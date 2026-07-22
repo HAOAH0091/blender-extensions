@@ -1,10 +1,6 @@
 ﻿# HAOAH Blender Extensions
 # yi jian fa bu jiao ben
-# yong fa: .\release.ps1 [-Push]
-
-param(
-    [switch]$Push
-)
+# yong fa: .\release.ps1
 
 # Any unexpected error should terminate immediately.
 $ErrorActionPreference = "Stop"
@@ -283,45 +279,36 @@ if (-not (Test-Path $indexPath)) {
 }
 
 # ============================ git push ============================
-if ($Push) {
-    Write-Host ""
-    Write-Host "Pushing to GitHub..." -ForegroundColor Cyan
-    Push-Location $repoRoot
-    try {
-        git add packages/
-        $gitStatus = git status -s
-        if (-not $gitStatus) {
-            Write-Host "  no changes, skip." -ForegroundColor DarkYellow
-            Pop-Location
-            Write-Host ""
-            Write-Host "=== DONE ===" -ForegroundColor Cyan
-            exit 0
-        }
-
-        $date = Get-Date -Format "yyyy-MM-dd HH:mm"
-        $commitMsg = "release: $date - $($packaged -join ', ')"
-        git commit -m $commitMsg
-
-        try {
-            git push
-            Write-Host "  pushed." -ForegroundColor Green
-        } catch {
-            Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
-            git reset --soft HEAD~1
-            Write-Host "  commit rolled back. Fix the issue and try again."
-            exit 1
-        }
-    } finally {
+Write-Host ""
+Write-Host "Pushing to GitHub..." -ForegroundColor Cyan
+Push-Location $repoRoot
+try {
+    git add packages/
+    $gitStatus = git status -s
+    if (-not $gitStatus) {
+        Write-Host "  no changes, skip." -ForegroundColor DarkYellow
         Pop-Location
+        Write-Host ""
+        Write-Host "=== DONE ===" -ForegroundColor Cyan
+        exit 0
     }
-} else {
-    Write-Host ""
-    Write-Host "Skip push (add -Push to auto-push to GitHub)" -ForegroundColor DarkYellow
+
+    $date = Get-Date -Format "yyyy-MM-dd HH:mm"
+    $commitMsg = "release: $date - $($packaged -join ', ')"
+    git commit -m $commitMsg
+
+    try {
+        git push
+        Write-Host "  pushed." -ForegroundColor Green
+    } catch {
+        Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
+        git reset --soft HEAD~1
+        Write-Host "  commit rolled back. Fix the issue and try again."
+        exit 1
+    }
+} finally {
+    Pop-Location
 }
 
 Write-Host ""
 Write-Host "=== DONE ===" -ForegroundColor Cyan
-Write-Host "local packages: $packagesDir"
-if (-not $Push) {
-    Write-Host "review OK then: git add packages/; git commit; git push"
-}
