@@ -165,6 +165,7 @@ $addonDirs = Get-ChildItem $addonsSource -Directory | Where-Object {
 
 if (-not $addonDirs) {
     Write-Host "ERROR: no addon source directories found." -ForegroundColor Red
+    Read-Host "Press Enter to close"
     exit 1
 }
 
@@ -258,6 +259,7 @@ Write-Host "Generating index.json..." -ForegroundColor Cyan
 if (-not (Test-Path $blenderExe)) {
     Write-Host "ERROR: Blender not found at: $blenderExe" -ForegroundColor Red
     Write-Host "Update `$blenderExe in release.ps1 if Blender was moved."
+    Read-Host "Press Enter to close"
     exit 1
 }
 
@@ -275,6 +277,7 @@ if ($foundMatch) {
 
 if (-not (Test-Path $indexPath)) {
     Write-Host "ERROR: index.json was not generated. Check Blender output above." -ForegroundColor Red
+    Read-Host "Press Enter to close"
     exit 1
 }
 
@@ -290,7 +293,8 @@ try {
         Pop-Location
         Write-Host ""
         Write-Host "=== DONE ===" -ForegroundColor Cyan
-        exit 0
+        Read-Host "Press Enter to close"
+        return
     }
 
     $date = Get-Date -Format "yyyy-MM-dd HH:mm"
@@ -304,6 +308,7 @@ try {
         Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
         git reset --soft HEAD~1
         Write-Host "  commit rolled back. Fix the issue and try again."
+        Read-Host "Press Enter to close"
         exit 1
     }
 } finally {
@@ -312,3 +317,5 @@ try {
 
 Write-Host ""
 Write-Host "=== DONE ===" -ForegroundColor Cyan
+
+Read-Host "Press Enter to close"
