@@ -6,7 +6,35 @@ param(
     [switch]$Push
 )
 
+# Any unexpected error should terminate immediately.
 $ErrorActionPreference = "Stop"
+
+# ============================ helpers ============================
+
+function ConvertTo-TomlString($s) {
+    # Escape special characters in TOML basic strings: backslash and double-quote.
+    if (-not $s) { return "" }
+    return $s.Replace('\', '\\').Replace('"', '\"')
+}
+
+function Safe-Substring($s, $maxLen) {
+    # Truncate by character count, avoiding surrogate-pair split.
+    if ($s.Length -le $maxLen) { return $s }
+    $result = ""
+    $i = 0
+    $count = 0
+    while ($i -lt $s.Length -and $count -lt $maxLen) {
+        if ([char]::IsHighSurrogate($s[$i]) -and ($i + 1) -lt $s.Length -and [char]::IsLowSurrogate($s[$i + 1])) {
+            $result += $s.Substring($i, 2)
+            $i += 2
+        } else {
+            $result += $s[$i]
+            $i++
+        }
+        $count++
+    }
+    return $result + "..."
+}
 
 # ============================ config ============================
 $blenderExe = "G:\steam\steamapps\common\Blender\blender.exe"
@@ -56,6 +84,8 @@ function Get-BlInfo($addonDir) {
         $info.blender_min = "$($matches[1]).$($matches[2]).$($matches[3])"
     } elseif ($raw -match '"blender"\s*:\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)') {
         $info.blender_min = "$($matches[1]).$($matches[2]).0"
+    } else {
+        $info.blender_min = "4.2.0"  # default: oldest Blender that supports extensions
     }
 
     return $info
@@ -81,19 +111,16 @@ function New-Manifest($id, $info) {
     $tags = Get-Tags $info.category
     $tagsStr = ($tags | ForEach-Object { '"' + $_ + '"' }) -join ", "
 
-    $desc = $info.description
-    if ($desc.Length -gt 100) {
-        $desc = $desc.Substring(0, 97) + "..."
-    }
+    $desc = ConvertTo-TomlString (Safe-Substring $info.description 100)
 
     $lines = @()
     $lines += 'schema_version = "1.0.0"'
     $lines += ''
-    $lines += 'id = "' + $id + '"'
-    $lines += 'version = "' + $info.version + '"'
-    $lines += 'name = "' + $info.name + '"'
+    $lines += 'id = "' + (ConvertTo-TomlString $id) + '"'
+    $lines += 'version = "' + (ConvertTo-TomlString $info.version) + '"'
+    $lines += 'name = "' + (ConvertTo-TomlString $info.name) + '"'
     $lines += 'tagline = "' + $desc + '"'
-    $lines += 'maintainer = "' + $info.author + '"'
+    $lines += 'maintainer = "' + (ConvertTo-TomlString $info.author) + '"'
     $lines += ''
     $lines += 'type = "add-on"'
     $lines += ''
@@ -150,15 +177,22 @@ $addonDirs | ForEach-Object { Write-Host "  $($_.Name)" }
 
 New-Item -ItemType Directory -Force -Path $packagesDir | Out-Null
 
-Write-Host ""
-Write-Host "Cleaning old packages..." -ForegroundColor Yellow
-$oldZips = Get-ChildItem $packagesDir -Filter "*.zip" -ErrorAction SilentlyContinue
-if ($oldZips) {
-    $oldZips | Remove-Item -Force
-    Write-Host "  removed $($oldZips.Count) old zip(s)"
+# ---- read existing index to detect version changes ----
+$indexPath = Join-Path $packagesDir "index.json"
+$oldVersions = @{}
+if (Test-Path $indexPath) {
+    try {
+        $oldIndex = Get-Content $indexPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $oldIndex.data | ForEach-Object { $oldVersions[$_.id] = $_.version }
+        Write-Host "Existing index: $($oldVersions.Count) extension(s)"
+    } catch {
+        Write-Host "WARNING: cannot parse existing index, will package all" -ForegroundColor DarkYellow
+    }
 }
 
-$processed = 0
+# ---- packaging: skip unchanged ----
+$packaged = @()
+$skipped = @()
 foreach ($dir in $addonDirs) {
     $id = $dir.Name -replace '-master$', ''
     $info = Get-BlInfo $dir.FullName
@@ -168,8 +202,23 @@ foreach ($dir in $addonDirs) {
         continue
     }
 
+    # check if version changed
+    $oldVer = $oldVersions[$id]
+    if ($oldVer -and $oldVer -eq $info.version) {
+        Write-Host "  SKIP $($dir.Name): v$($info.version) unchanged" -ForegroundColor DarkGray
+        $skipped += $id
+        continue
+    }
+
+    # remove old zips for this addon (exact prefix match: id- followed by digit)
+    Get-ChildItem $packagesDir -Filter "$id-[0-9]*.zip" -ErrorAction SilentlyContinue | Remove-Item -Force
+
     Write-Host ""
-    Write-Host "--- $($dir.Name) -> $id v$($info.version) ---" -ForegroundColor Cyan
+    if ($oldVer) {
+        Write-Host "--- $($dir.Name): v$oldVer -> v$($info.version) ---" -ForegroundColor Cyan
+    } else {
+        Write-Host "--- $($dir.Name): NEW v$($info.version) ---" -ForegroundColor Cyan
+    }
 
     $tmp = Join-Path $tempRoot $id
     if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
@@ -188,31 +237,49 @@ foreach ($dir in $addonDirs) {
     Push-Location $tmp
     try {
         $items = Get-ChildItem -Path $tmp
+        if (-not $items) {
+            Write-Host "  WARNING: nothing to package (empty addon directory?)" -ForegroundColor Yellow
+            continue
+        }
         Compress-Archive -Path $items.FullName -DestinationPath $zipPath -Force
         $sizeKB = [math]::Round((Get-Item $zipPath).Length / 1KB, 1)
         Write-Host "  -> $zipName (${sizeKB} KB)" -ForegroundColor Green
-        $processed++
+        $packaged += $id
     } finally {
         Pop-Location
     }
 }
 
 Write-Host ""
-Write-Host "Packaged: $processed extension(s)" -ForegroundColor Green
+$pCount = $packaged.Count
+$sCount = $skipped.Count
+Write-Host "Packaged: $pCount | Skipped (unchanged): $sCount" -ForegroundColor Green
 
 # ============================ generate index ============================
 Write-Host ""
 Write-Host "Generating index.json..." -ForegroundColor Cyan
-$prevEAP = $ErrorActionPreference
+
+if (-not (Test-Path $blenderExe)) {
+    Write-Host "ERROR: Blender not found at: $blenderExe" -ForegroundColor Red
+    Write-Host "Update `$blenderExe in release.ps1 if Blender was moved."
+    exit 1
+}
+
+$prevErrorAction = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 $result = & $blenderExe --command extension server-generate --repo-dir=$packagesDir 2>&1
-$ErrorActionPreference = $prevEAP
+$ErrorActionPreference = $prevErrorAction
 $foundMatch = $result | Select-String "found (\d+) packages"
 if ($foundMatch) {
     $count = $foundMatch.Matches.Groups[1].Value
     Write-Host "  recognized: $count extension(s)" -ForegroundColor Green
 } else {
     Write-Host "  WARNING: cannot confirm index generation status" -ForegroundColor Yellow
+}
+
+if (-not (Test-Path $indexPath)) {
+    Write-Host "ERROR: index.json was not generated. Check Blender output above." -ForegroundColor Red
+    exit 1
 }
 
 # ============================ git push ============================
@@ -223,13 +290,26 @@ if ($Push) {
     try {
         git add packages/
         $gitStatus = git status -s
-        if ($gitStatus) {
-            $date = Get-Date -Format "yyyy-MM-dd HH:mm"
-            git commit -m "release: $date - $processed extension(s)"
+        if (-not $gitStatus) {
+            Write-Host "  no changes, skip." -ForegroundColor DarkYellow
+            Pop-Location
+            Write-Host ""
+            Write-Host "=== DONE ===" -ForegroundColor Cyan
+            exit 0
+        }
+
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm"
+        $commitMsg = "release: $date - $($packaged -join ', ')"
+        git commit -m $commitMsg
+
+        try {
             git push
             Write-Host "  pushed." -ForegroundColor Green
-        } else {
-            Write-Host "  no changes, skip." -ForegroundColor DarkYellow
+        } catch {
+            Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
+            git reset --soft HEAD~1
+            Write-Host "  commit rolled back. Fix the issue and try again."
+            exit 1
         }
     } finally {
         Pop-Location
