@@ -110,11 +110,28 @@ function New-Manifest($id, $info) {
 
 # ============================ clean temp ============================
 function Clear-TempPackage($dir) {
+    # __pycache__ / .git / .gitignore
     Get-ChildItem $dir -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     Get-ChildItem $dir -Recurse -File -Filter ".gitignore" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     Get-ChildItem $dir -Recurse -File -Filter "*.zip" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
     Get-ChildItem $dir -Recurse -Directory -Filter ".git" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     Get-ChildItem $dir -Recurse -Directory -Filter ".~stale~*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+    # dev directories ---- do not ship to users
+    @("dev_plans", "_plans", "docs", "plans", "notes", ".vscode", ".idea", "__MACOSX") | ForEach-Object {
+        Get-ChildItem $dir -Recurse -Directory -Filter $_ -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    # dev plan / temp files ---- do not ship to users
+    Get-ChildItem $dir -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.Name -like '*计划*' -or $_.Name -like '*开发*' -or $_.Name -like '*进度*' -or
+        $_.Name -like '*plan*' -or $_.Name -like '*TODO*' -or
+        $_.Name -like '*CHANGELOG*' -or $_.Name -like '*VERSION*' -or
+        $_.Name -like 'plan_*' -or $_.Name -like 'plan-*' -or $_.Name -like '*_plan.*' -or
+        $_.Name -like '_temp_*' -or $_.Name -like '*.tmp'
+    } | Remove-Item -Force -ErrorAction SilentlyContinue
+
+    # empty / $null files
     Get-ChildItem $dir -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq '$null' -or $_.Name -eq '' } | Remove-Item -Force -ErrorAction SilentlyContinue
 }
 
