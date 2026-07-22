@@ -135,7 +135,7 @@
       "id": "psd_layer_importer_plus",
       "name": "PSD Layer Importer PLUS",
       "tagline": "\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u652f\u6301\u5237\u65b0\u56fe\u5c42\u4e0e\u6df7\u5408\u6a21\u5f0f\u5207\u6362",
-      "version": "3.3.0",
+      "version": "3.3.1",
       "type": "add-on",
       "maintainer": "HAOAH (toukou0091@gmail.com)",
       "license": [
@@ -147,9 +147,9 @@
         "Import-Export",
         "Pipeline"
       ],
-      "archive_url": "./psd_layer_importer_plus-3.3.0.zip",
+      "archive_url": "./psd_layer_importer_plus-3.3.1.zip",
       "archive_size": 76449,
-      "archive_hash": "sha256:c32417224424bb45ceb79f09bc85bbad2032c6ce537027b005b84b646394c557"
+      "archive_hash": "sha256:dbcfd1208bf141af61e13bb5fea14dd34886dcb36d0b53e7f12516958665cf57"
     }
   ]
 }
