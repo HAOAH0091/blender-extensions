@@ -18,8 +18,8 @@
         "Render"
       ],
       "archive_url": "./aov_plus-2.4.3.zip",
-      "archive_size": 69862,
-      "archive_hash": "sha256:c3e9e1e746b0f91e7d8ada6e237071b008c38088838ec705841ac9fa4f6d4945"
+      "archive_size": 53969,
+      "archive_hash": "sha256:1ce07ea42eee042150ce3f6b60a2f576b4d683738df1dead552c578ef3887401"
     },
     {
       "schema_version": "1.0.0",
@@ -37,8 +37,8 @@
         "Animation"
       ],
       "archive_url": "./autosway-1.2.0.zip",
-      "archive_size": 60892,
-      "archive_hash": "sha256:89d2b9ac8d08b68d0c9fd90905a5d68c7623bfe88e9825a6621a0b89a5134aee"
+      "archive_size": 30910,
+      "archive_hash": "sha256:293c72661621ef901d36478e102fadeee55c74758709c5fe1cba464377348ee8"
     },
     {
       "schema_version": "1.0.0",
@@ -57,8 +57,8 @@
         "System"
       ],
       "archive_url": "./cache_collector-1.0.0.zip",
-      "archive_size": 28229,
-      "archive_hash": "sha256:96ae326067d5aaf109d8adf6cd5b52884ad1548b9424c55dd1e9ecec2f48317b"
+      "archive_size": 13807,
+      "archive_hash": "sha256:25cd696bfa417da50b3cfbb18f7d5301783399bfe42e02ba0351eaa23a537048"
     },
     {
       "schema_version": "1.0.0",
@@ -76,8 +76,8 @@
         "Compositing"
       ],
       "archive_url": "./compify-2.5.0.zip",
-      "archive_size": 88283,
-      "archive_hash": "sha256:69f79059de1d6c51b7b52598c3505f121e21ceea6ec2133ffa4ef4e5fbacdfad"
+      "archive_size": 71090,
+      "archive_hash": "sha256:49c11f7dc43768038b0c953ae83b8fece5caa00a16a6cc5d81959b170f48e9d8"
     },
     {
       "schema_version": "1.0.0",
@@ -95,8 +95,8 @@
         "Import-Export"
       ],
       "archive_url": "./mbb_blender-2.0.0.zip",
-      "archive_size": 102633,
-      "archive_hash": "sha256:3fb0f582090a4e596e12686093058503cb2390f3c33d8ff61e91086bfa0b2fd6"
+      "archive_size": 40348,
+      "archive_hash": "sha256:9ff532c84aed481df82b419e6ac432eae5fce61feb2ad529e797ebc979464b48"
     },
     {
       "schema_version": "1.0.0",
@@ -115,7 +115,7 @@
       ],
       "archive_url": "./parallax_locker-1.0.0.zip",
       "archive_size": 14224,
-      "archive_hash": "sha256:b389ed0bc409ff6cd8a9bd843026a28cd230c4a88f167e7270441644982f39ad"
+      "archive_hash": "sha256:17388c44d0b84d2172dd608714f55dfb22e159ce9a983a788911bd69711a847d"
     },
     {
       "schema_version": "1.0.0",
@@ -133,8 +133,8 @@
         "Import-Export"
       ],
       "archive_url": "./psd_layer_importer_plus-3.3.0.zip",
-      "archive_size": 75073,
-      "archive_hash": "sha256:45efdd99950da534387e02fb720457d21699eeda1f4d0faf0fe3e2979fda3ecd"
+      "archive_size": 44778,
+      "archive_hash": "sha256:b9f8b65d8ed6b6fa9a5903af09c9c42db96ddba838a821df3717110f9208ae48"
     }
   ]
 }
