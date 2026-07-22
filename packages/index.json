@@ -1,0 +1,155 @@
+{
+  "version": "v1",
+  "blocklist": [],
+  "data": [
+    {
+      "schema_version": "1.0.0",
+      "id": "aov_plus",
+      "name": "AOV+",
+      "tagline": "AOV\u8282\u70b9\u7ba1\u7406\u3001\u8f93\u51fa\u6587\u4ef6\u540d\u6279\u5904\u7406\u4e0e\u9009\u62e9\u6027\u6e32\u67d3\u5de5\u5177",
+      "version": "2.4.3",
+      "type": "add-on",
+      "maintainer": "HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "5.0.0",
+      "website": "https://github.com/HAOAH0091/aov_plus",
+      "tags": [
+        "Render",
+        "Pipeline",
+        "Compositing"
+      ],
+      "archive_url": "./aov_plus-2.4.3.zip",
+      "archive_size": 70694,
+      "archive_hash": "sha256:ea2672f08f4d19627290e287413c4b115f01df81e4faeddd10a003e15da51238"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "autosway",
+      "name": "AutoSway",
+      "tagline": "\u4e3a\u9aa8\u9abc\u94fe\u6dfb\u52a0\u6b63\u5f26\u6ce2\u6446\u52a8\u52a8\u753b\uff0c\u652f\u6301\u624b\u52a8\u63a7\u5236\u4e0e\u591a\u7ec4\u7ba1\u7406",
+      "version": "1.2.0",
+      "type": "add-on",
+      "maintainer": "HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "4.0.0",
+      "website": "https://github.com/HAOAH0091/autosway",
+      "tags": [
+        "Animation",
+        "Rigging"
+      ],
+      "archive_url": "./autosway-1.2.0.zip",
+      "archive_size": 62442,
+      "archive_hash": "sha256:1129024df7247e87be913af10a99e6f2af3f7b4ea908ab4185282fe3e945004b"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "cache_collector",
+      "name": "Cache Collector",
+      "tagline": "Scan and pack Alembic/USD cache files into the project's cache/ folder",
+      "version": "1.0.0",
+      "type": "add-on",
+      "maintainer": "HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "5.2.0",
+      "website": "https://github.com/HAOAH0091/cache_collector",
+      "tags": [
+        "Pipeline",
+        "System",
+        "Import-Export"
+      ],
+      "archive_url": "./cache_collector-1.0.0.zip",
+      "archive_size": 28639,
+      "archive_hash": "sha256:ebbf11ea69147cbedcf2249eaf16d7898f56b7550cfd96cc6fa615e3e2b133a0"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "compify",
+      "name": "Compify",
+      "tagline": "Do compositing in 3D space",
+      "version": "2.5.0",
+      "type": "add-on",
+      "maintainer": "Nathan Vegdahl, Ian Hubert / HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "4.0.0",
+      "tags": [
+        "Compositing",
+        "Render"
+      ],
+      "archive_url": "./compify-2.5.0.zip",
+      "archive_size": 89124,
+      "archive_hash": "sha256:b4375714d18c99d17af327ef26e442c1caff31afaacbb41701a74a2de4e8a660"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "mbb_blender",
+      "name": "Maya Blender Bridge (MBB)",
+      "tagline": "USD-based bridge: Blender <-> Maya via socket + USD + auto material reconstruction",
+      "version": "2.0.0",
+      "type": "add-on",
+      "maintainer": "Edward Lim / HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "5.0.0",
+      "website": "https://github.com/HAOAH0091/mbb_blender",
+      "tags": [
+        "Import-Export",
+        "Pipeline",
+        "Material"
+      ],
+      "archive_url": "./mbb_blender-2.0.0.zip",
+      "archive_size": 104637,
+      "archive_hash": "sha256:f65f6ef2d0b2d1d426aadd9c24e21c6208e67d51e3c074a60b1a60ee57bf13b3"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "parallax_locker",
+      "name": "Parallax Locker",
+      "tagline": "\u5c06\u9009\u4e2d\u7269\u4f53\u9489\u5728\u76f8\u673a\u5c4f\u5e55\u7a7a\u95f4\uff0c\u62d6\u62fd\u65f6\u81ea\u52a8\u4fdd\u6301\u5c4f\u5e55\u5750\u6807\u5e76\u7f29\u653e",
+      "version": "1.0.0",
+      "type": "add-on",
+      "maintainer": "HAOAH",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "4.0.0",
+      "website": "https://github.com/HAOAH0091/parallax_locker",
+      "tags": [
+        "3D View",
+        "Animation"
+      ],
+      "archive_url": "./parallax_locker-1.0.0.zip",
+      "archive_size": 14561,
+      "archive_hash": "sha256:8e73ee91e44c0e85e01b35723e8387e1bdfe424c1c7a5299c9ca0d3adf99188a"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "psd_layer_importer_plus",
+      "name": "PSD Layer Importer PLUS",
+      "tagline": "\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u652f\u6301\u5237\u65b0\u56fe\u5c42\u4e0e\u6df7\u5408\u6a21\u5f0f\u5207\u6362",
+      "version": "3.3.0",
+      "type": "add-on",
+      "maintainer": "HAOAH (toukou0091@gmail.com)",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "4.0.0",
+      "website": "https://github.com/HAOAH0091/psd_layer_importer_plus",
+      "tags": [
+        "Import-Export",
+        "Pipeline"
+      ],
+      "archive_url": "./psd_layer_importer_plus-3.3.0.zip",
+      "archive_size": 76177,
+      "archive_hash": "sha256:5a09cc08733a75d0fc8557540046f04516d8add973da2b80b164fb13e04e451e"
+    }
+  ]
+}
