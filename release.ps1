@@ -1,6 +1,18 @@
 # HAOAH Blender Extensions
 # yi jian fa bu jiao ben
 # yong fa: .\release.ps1
+# 用 -NoPause 可禁止内部所有 "Press Enter" 暂停(供 bat 包装脚本调用, 由 bat 统一 pause)
+
+param(
+    [switch]$NoPause
+)
+
+# 统一暂停出口：NoPause 时跳过内部暂停(bat 会兜底 pause)
+function Wait-Close {
+    if (-not $NoPause) {
+        Wait-Close | Out-Null
+    }
+}
 
 # Any unexpected error should terminate immediately.
 $ErrorActionPreference = "Stop"
@@ -165,7 +177,7 @@ $addonDirs = Get-ChildItem $addonsSource -Directory | Where-Object {
 
 if (-not $addonDirs) {
     Write-Host "ERROR: no addon source directories found." -ForegroundColor Red
-    Read-Host "Press Enter to close"
+    Wait-Close
     exit 1
 }
 
@@ -288,7 +300,7 @@ Write-Host "Generating index.json..." -ForegroundColor Cyan
 if (-not (Test-Path $blenderExe)) {
     Write-Host "ERROR: Blender not found at: $blenderExe" -ForegroundColor Red
     Write-Host "Update `$blenderExe in release.ps1 if Blender was moved."
-    Read-Host "Press Enter to close"
+    Wait-Close
     exit 1
 }
 
@@ -306,7 +318,7 @@ if ($foundMatch) {
 
 if (-not (Test-Path $indexPath)) {
     Write-Host "ERROR: index.json was not generated. Check Blender output above." -ForegroundColor Red
-    Read-Host "Press Enter to close"
+    Wait-Close
     exit 1
 }
 
@@ -322,7 +334,7 @@ try {
         Pop-Location
         Write-Host ""
         Write-Host "=== DONE ===" -ForegroundColor Cyan
-        Read-Host "Press Enter to close"
+        Wait-Close
         return
     }
 
@@ -334,7 +346,7 @@ try {
         Write-Host "  git config --local user.name \"Your Name\"" -ForegroundColor Yellow
         Write-Host "  git config --local user.email \"you@example.com\"" -ForegroundColor Yellow
         Pop-Location
-        Read-Host "Press Enter to close"
+        Wait-Close
         exit 1
     }
 
@@ -344,7 +356,7 @@ try {
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: git commit failed (identity or other issue), NOT pushed." -ForegroundColor Red
         Pop-Location
-        Read-Host "Press Enter to close"
+        Wait-Close
         exit 1
     }
 
@@ -355,7 +367,7 @@ try {
         Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
         git reset --soft HEAD~1
         Write-Host "  commit rolled back. Fix the issue and try again."
-        Read-Host "Press Enter to close"
+        Wait-Close
         exit 1
     }
 } finally {
@@ -365,4 +377,4 @@ try {
 Write-Host ""
 Write-Host "=== DONE ===" -ForegroundColor Cyan
 
-Read-Host "Press Enter to close"
+Wait-Close
