@@ -1,4 +1,4 @@
-﻿# HAOAH Blender Extensions
+# HAOAH Blender Extensions
 # yi jian fa bu jiao ben
 # yong fa: .\release.ps1
 
@@ -252,6 +252,35 @@ $pCount = $packaged.Count
 $sCount = $skipped.Count
 Write-Host "Packaged: $pCount | Skipped (unchanged): $sCount" -ForegroundColor Green
 
+# ============================ clean stale zips (keep newest per addon) ============================
+# 无论是否重新打包，都清理每个插件目录下"非最新版本"的旧 zip，
+# 避免旧版残留导致 server-generate 索引进重复条目。
+Write-Host ""
+Write-Host "Cleaning stale zips..." -ForegroundColor Cyan
+$zipFiles = Get-ChildItem $packagesDir -Filter "*.zip" -ErrorAction SilentlyContinue
+$removed = 0
+# 按 id 前缀分组（格式 id-X.Y.Z.zip）。id 为最后一个 '-' 前的部分。
+$byId = @{}
+foreach ($z in $zipFiles) {
+    $base = $z.BaseName   # e.g. psd_layer_importer_plus-3.4.0
+    $lastDash = $base.LastIndexOf('-')
+    if ($lastDash -lt 0) { continue }
+    $id = $base.Substring(0, $lastDash)
+    $ver = $base.Substring($lastDash + 1)
+    if (-not $byId.ContainsKey($id)) { $byId[$id] = @() }
+    $byId[$id] += [PSCustomObject]@{ File = $z; Ver = $ver }
+}
+foreach ($id in $byId.Keys) {
+    $group = $byId[$id] | Sort-Object { [version]$_.Ver } -Descending
+    for ($i = 1; $i -lt $group.Count; $i++) {
+        Remove-Item $group[$i].File.FullName -Force -ErrorAction SilentlyContinue
+        Write-Host "  removed stale: $($group[$i].File.Name)" -ForegroundColor DarkYellow
+        $removed++
+    }
+}
+$keptCount = (Get-ChildItem $packagesDir -Filter "*.zip").Count
+Write-Host "  removed $removed stale zip(s), now $keptCount newest zip(s)." -ForegroundColor Green
+
 # ============================ generate index ============================
 Write-Host ""
 Write-Host "Generating index.json..." -ForegroundColor Cyan
@@ -297,9 +326,27 @@ try {
         return
     }
 
+    # 检查 git 身份：未配置会导致 commit 失败且脚本误显示 pushed
+    $gName = git config --local user.name
+    $gEmail = git config --local user.email
+    if (-not $gName -or -not $gEmail) {
+        Write-Host "ERROR: git identity not configured. Run:" -ForegroundColor Red
+        Write-Host "  git config --local user.name \"Your Name\"" -ForegroundColor Yellow
+        Write-Host "  git config --local user.email \"you@example.com\"" -ForegroundColor Yellow
+        Pop-Location
+        Read-Host "Press Enter to close"
+        exit 1
+    }
+
     $date = Get-Date -Format "yyyy-MM-dd HH:mm"
     $commitMsg = "release: $date - $($packaged -join ', ')"
     git commit -m $commitMsg
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: git commit failed (identity or other issue), NOT pushed." -ForegroundColor Red
+        Pop-Location
+        Read-Host "Press Enter to close"
+        exit 1
+    }
 
     try {
         git push
