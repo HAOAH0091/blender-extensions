@@ -122,7 +122,7 @@
       "id": "psd_layer_importer_plus",
       "name": "PSD Layer Importer PLUS",
       "tagline": "View3D > Sidebar > PSD\u56fe\u5c42\u5bfc\u5165\u5de5\u5177\u3002\u652f\u6301\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u5237\u65b0\u56fe\u5c42\uff0c\u91cd\u7f6e\u53d8\u6362\uff0c\u66f4\u6539\u6587\u4ef6\u8def\u5f84\uff0c\u4ee5\u53ca\u5207\u6362\u6df7\u5408\u6a21\u5f0f\u3002",
-      "version": "3.3.0",
+      "version": "3.4.0",
       "type": "add-on",
       "maintainer": "HAOAH (toukou0091@gmail.com)",
       "license": [
@@ -132,9 +132,28 @@
       "tags": [
         "Import-Export"
       ],
-      "archive_url": "./psd_layer_importer_plus-3.3.0.zip",
-      "archive_size": 44778,
-      "archive_hash": "sha256:b9f8b65d8ed6b6fa9a5903af09c9c42db96ddba838a821df3717110f9208ae48"
+      "archive_url": "./psd_layer_importer_plus-3.4.0.zip",
+      "archive_size": 73595,
+      "archive_hash": "sha256:7b5f1dd1beb4b58fe832da637b63c6b7786ad6fa7157eb51168bd626e2c5eae5"
+    },
+    {
+      "schema_version": "1.0.0",
+      "id": "unpack_guard",
+      "name": "Unpack Guard\uff08\u89e3\u5305\u5b89\u5168\u52a9\u624b\uff09",
+      "tagline": "\u62e6\u622a\u5b98\u65b9\u89e3\u5305\uff0c\u68c0\u6d4b\u540c\u540d\u7d20\u6750\u5e76\u8be2\u95ee\u5408\u5e76\u6216\u81ea\u52a8\u91cd\u547d\u540d\u9632\u6b62\u9519\u4f4d",
+      "version": "0.2.0",
+      "type": "add-on",
+      "maintainer": "Blender \u7f8e\u672f\u63d2\u4ef6\u5f00\u53d1",
+      "license": [
+        "SPDX:GPL-3.0-or-later"
+      ],
+      "blender_version_min": "5.2.0",
+      "tags": [
+        "Import-Export"
+      ],
+      "archive_url": "./unpack_guard-0.2.0.zip",
+      "archive_size": 23115,
+      "archive_hash": "sha256:bcd1409707457f47f3cfaa8093a20b023864f6819a590d7cd05c3f41c6559a55"
     }
   ]
 }
