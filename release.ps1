@@ -274,13 +274,19 @@ $removed = 0
 # 按 id 前缀分组（格式 id-X.Y.Z.zip）。id 为最后一个 '-' 前的部分。
 $byId = @{}
 foreach ($z in $zipFiles) {
+    if ($null -eq $z) { continue }
     $base = $z.BaseName   # e.g. psd_layer_importer_plus-3.4.0
+    if ($null -eq $base) { continue }
     $lastDash = $base.LastIndexOf('-')
     if ($lastDash -lt 0) { continue }
     $id = $base.Substring(0, $lastDash)
     $ver = $base.Substring($lastDash + 1)
-    if (-not $byId.ContainsKey($id)) { $byId[$id] = @() }
-    $byId[$id] += [PSCustomObject]@{ File = $z; Ver = $ver }
+    $entry = [PSCustomObject]@{ File = $z; Ver = $ver }
+    if ($byId.ContainsKey($id)) {
+        $byId[$id] = @($byId[$id]) + $entry
+    } else {
+        $byId[$id] = @($entry)
+    }
 }
 foreach ($id in $byId.Keys) {
     $group = $byId[$id] | Sort-Object { [version]$_.Ver } -Descending
