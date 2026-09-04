@@ -122,7 +122,7 @@
       "id": "psd_layer_importer_plus",
       "name": "PSD Layer Importer PLUS",
       "tagline": "View3D > Sidebar > PSD\u56fe\u5c42\u5bfc\u5165\u5de5\u5177\u3002\u652f\u6301\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u5237\u65b0\u56fe\u5c42\uff0c\u91cd\u7f6e\u53d8\u6362\uff0c\u66f4\u6539\u6587\u4ef6\u8def\u5f84\uff0c\u4ee5\u53ca\u5207\u6362\u6df7\u5408\u6a21\u5f0f\u3002",
-      "version": "3.5.2",
+      "version": "3.5.3",
       "type": "add-on",
       "maintainer": "HAOAH (toukou0091@gmail.com)",
       "license": [
@@ -132,9 +132,9 @@
       "tags": [
         "Import-Export"
       ],
-      "archive_url": "./psd_layer_importer_plus-3.5.2.zip",
-      "archive_size": 75706,
-      "archive_hash": "sha256:d091fb1672fe5e3b8e4cd85acbb7e46e5ca248190c96bbfb805dbf1340ad1b28"
+      "archive_url": "./psd_layer_importer_plus-3.5.3.zip",
+      "archive_size": 75826,
+      "archive_hash": "sha256:5d4d2989b9751e2f0534c33205463a9dcc0e43d0334a7e4387d8b7461540bad7"
     },
     {
       "schema_version": "1.0.0",
