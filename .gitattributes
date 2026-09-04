@@ -1,0 +1,15 @@
+# Force Windows batch + PowerShell scripts to use CRLF line endings.
+# Without this, PowerShell 5.1 mis-parses LF-only scripts and can report
+# variables as $null inside foreach blocks (see the release.ps1 $byId bug).
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
+
+# Default: treat everything else as text so git handles line endings sanely,
+# but never touch binary files (images, zips, .blend).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.zip   binary
+*.blend binary
