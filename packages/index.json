@@ -141,7 +141,7 @@
       "id": "RealTimeMotionPath",
       "name": "RealTimeMotionPath",
       "tagline": "Display and edit motion paths in real time in the 3D Viewport, with direct handle editing and Graph ...",
-      "version": "1.3.9",
+      "version": "1.6.0",
       "type": "add-on",
       "maintainer": "HAOAH",
       "license": [
@@ -151,9 +151,9 @@
       "tags": [
         "Animation"
       ],
-      "archive_url": "./RealTimeMotionPath-1.3.9.zip",
-      "archive_size": 741815,
-      "archive_hash": "sha256:7a026b7dd7dcc3fca7dee88e515a0ecb47a9ee8a876c89b019b1c01ec71cdfaf"
+      "archive_url": "./RealTimeMotionPath-1.6.0.zip",
+      "archive_size": 5382071,
+      "archive_hash": "sha256:32ea81e0bac2b6187290231993905544a783e727d4f44a1dbdfbd02c2b9735c2"
     },
     {
       "schema_version": "1.0.0",
