@@ -141,7 +141,7 @@
       "id": "psd_layer_importer_plus",
       "name": "PSD Layer Importer PLUS",
       "tagline": "View3D > Sidebar > PSD\u56fe\u5c42\u5bfc\u5165\u5de5\u5177\u3002\u652f\u6301\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u5237\u65b0\u56fe\u5c42\uff0c\u66f4\u6539\u6587\u4ef6\u8def\u5f84\uff0c\u4ee5\u53ca\u5207\u6362\u6df7\u5408\u6a21\u5f0f\u3002",
-      "version": "3.12.3",
+      "version": "3.12.4",
       "type": "add-on",
       "maintainer": "HAOAH (toukou0091@gmail.com)",
       "license": [
@@ -151,16 +151,16 @@
       "tags": [
         "Import-Export"
       ],
-      "archive_url": "./psd_layer_importer_plus-3.12.3.zip",
-      "archive_size": 175987,
-      "archive_hash": "sha256:9aa41c33b3ca2a39ace5ba42601129e4f6c3df190f286e3d0a7cc8f6528a71fd"
+      "archive_url": "./psd_layer_importer_plus-3.12.4.zip",
+      "archive_size": 218901,
+      "archive_hash": "sha256:304bb7bee228788734a9c1d6a974b91c1ca0b22fe259d4b275f8a5c73bc999a7"
     },
     {
       "schema_version": "1.0.0",
       "id": "RealTimeMotionPath",
       "name": "RealTimeMotionPath",
       "tagline": "Display and edit motion paths in real time in the 3D Viewport, with direct handle editing and Graph ...",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "type": "add-on",
       "maintainer": "HAOAH",
       "license": [
@@ -170,9 +170,9 @@
       "tags": [
         "Animation"
       ],
-      "archive_url": "./RealTimeMotionPath-1.6.1.zip",
-      "archive_size": 5398955,
-      "archive_hash": "sha256:c227f1925020eaaf5048f20d3a10b5bebf0b286d3ca0107d94a08f73b615fb87"
+      "archive_url": "./RealTimeMotionPath-1.6.2.zip",
+      "archive_size": 5404341,
+      "archive_hash": "sha256:709f375db2aeb5593663f5a4092e93d5548bfd623e3217049a42ff0f9233dd88"
     },
     {
       "schema_version": "1.0.0",
