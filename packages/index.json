@@ -65,7 +65,7 @@
       "id": "compify",
       "name": "Compify",
       "tagline": "Do compositing in 3D space.",
-      "version": "2.5.1",
+      "version": "2.7.2",
       "type": "add-on",
       "maintainer": "Nathan Vegdahl, Ian Hubert",
       "license": [
@@ -75,9 +75,9 @@
       "tags": [
         "Compositing"
       ],
-      "archive_url": "./compify-2.5.1.zip",
-      "archive_size": 105585,
-      "archive_hash": "sha256:eed05720a37878ec5acf5ef81bab236e87c7c1e496ca7c39479579536ad271f1"
+      "archive_url": "./compify-2.7.2.zip",
+      "archive_size": 184619,
+      "archive_hash": "sha256:f3d6e9eb376ed54d30ab3ff2762fad2b45e03c5698e6c2e7078d899bd7a8fc15"
     },
     {
       "schema_version": "1.0.0",
@@ -141,7 +141,7 @@
       "id": "psd_layer_importer_plus",
       "name": "PSD Layer Importer PLUS",
       "tagline": "View3D > Sidebar > PSD\u56fe\u5c42\u5bfc\u5165\u5de5\u5177\u3002\u652f\u6301\u5bfc\u5165PSD\u56fe\u5c42\u4e3aBlender\u5bf9\u8c61\uff0c\u5237\u65b0\u56fe\u5c42\uff0c\u66f4\u6539\u6587\u4ef6\u8def\u5f84\uff0c\u4ee5\u53ca\u5207\u6362\u6df7\u5408\u6a21\u5f0f\u3002",
-      "version": "3.12.5",
+      "version": "3.12.6",
       "type": "add-on",
       "maintainer": "HAOAH (toukou0091@gmail.com)",
       "license": [
@@ -151,9 +151,9 @@
       "tags": [
         "Import-Export"
       ],
-      "archive_url": "./psd_layer_importer_plus-3.12.5.zip",
-      "archive_size": 224213,
-      "archive_hash": "sha256:74c750f98062fcdcb5f737b6d0d23d360f16606d794e894a00617a933fc8108c"
+      "archive_url": "./psd_layer_importer_plus-3.12.6.zip",
+      "archive_size": 235685,
+      "archive_hash": "sha256:667a128e47a7952ab699120cc9399822562ccd4368b24f92e80513c4a9a5544a"
     },
     {
       "schema_version": "1.0.0",
