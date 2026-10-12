@@ -65,7 +65,7 @@
       "id": "compify",
       "name": "Compify",
       "tagline": "Do compositing in 3D space.",
-      "version": "2.7.2",
+      "version": "2.7.13",
       "type": "add-on",
       "maintainer": "Nathan Vegdahl, Ian Hubert",
       "license": [
@@ -75,9 +75,9 @@
       "tags": [
         "Compositing"
       ],
-      "archive_url": "./compify-2.7.2.zip",
-      "archive_size": 184619,
-      "archive_hash": "sha256:f3d6e9eb376ed54d30ab3ff2762fad2b45e03c5698e6c2e7078d899bd7a8fc15"
+      "archive_url": "./compify-2.7.13.zip",
+      "archive_size": 280359,
+      "archive_hash": "sha256:6e338591fd999d984d25b39426ba9f7168ef3270174ad6d13700262902f01f3b"
     },
     {
       "schema_version": "1.0.0",
