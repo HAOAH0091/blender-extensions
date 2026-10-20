@@ -65,7 +65,7 @@
       "id": "compify",
       "name": "Compify",
       "tagline": "Camera projection UV adjustment for 3D compositing.",
-      "version": "3.0.2",
+      "version": "3.0.3",
       "type": "add-on",
       "maintainer": "Nathan Vegdahl, Ian Hubert",
       "license": [
@@ -75,9 +75,9 @@
       "tags": [
         "Compositing"
       ],
-      "archive_url": "./compify-3.0.2.zip",
-      "archive_size": 1328557,
-      "archive_hash": "sha256:d48e57eda65207c57e445ca0d649ddf4e10a347798f41422c21a0b192014d914"
+      "archive_url": "./compify-3.0.3.zip",
+      "archive_size": 1337934,
+      "archive_hash": "sha256:9899a8829030988d65ee1ab9eb4d88b6ad0945f342da741654dbb77d8b9340cc"
     },
     {
       "schema_version": "1.0.0",
