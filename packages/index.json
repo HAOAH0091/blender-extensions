@@ -1,6 +1,7 @@
 {
   "version": "v1",
   "blocklist": [],
+  "assetlib_auth_method": "PER_LIBRARY",
   "data": [
     {
       "schema_version": "1.0.0",
@@ -65,7 +66,7 @@
       "id": "compify",
       "name": "Compify",
       "tagline": "Camera projection UV adjustment for 3D compositing.",
-      "version": "3.0.4",
+      "version": "3.0.8",
       "type": "add-on",
       "maintainer": "Nathan Vegdahl, Ian Hubert",
       "license": [
@@ -75,16 +76,16 @@
       "tags": [
         "Compositing"
       ],
-      "archive_url": "./compify-3.0.4.zip",
-      "archive_size": 1408719,
-      "archive_hash": "sha256:e0eb356f934541191d949582268c5eb578e530b8494c438fb53894018168536a"
+      "archive_url": "./compify-3.0.8.zip",
+      "archive_size": 1486907,
+      "archive_hash": "sha256:be00140fab8c7485151235572462a4e0c5bc0600c8afb9eea6051a9b7d0a774b"
     },
     {
       "schema_version": "1.0.0",
       "id": "image_cutter",
       "name": "Image Cutter\uff08\u8d34\u56fe\u62a0\u7f51\u683c\uff09",
       "tagline": "\u6309\u8d34\u56fe\u7684\u900f\u660e\u533a\u62a0\u51fa\u5f62\u72b6\uff0c\u94fa\u6210\u5e26\u8d34\u56fe\u4e0e UV \u7684\u4e09\u89d2\u7f51\u683c\uff1b\u53c2\u6570\u5b9e\u65f6\u53ef\u8c03\uff0c\u652f\u6301\u94a2\u7b14\u753b\u8def\u5f84\u5f15\u5bfc",
-      "version": "0.1.0",
+      "version": "0.3.0",
       "type": "add-on",
       "maintainer": "\u6d69 & \u5c0f\u6f88",
       "license": [
@@ -94,9 +95,9 @@
       "tags": [
         "Pipeline"
       ],
-      "archive_url": "./image_cutter-0.1.0.zip",
-      "archive_size": 72590,
-      "archive_hash": "sha256:68911e31e86ea50b7f8bc04ffce96d1227b382077f7cfdb10c200bf073fae41d"
+      "archive_url": "./image_cutter-0.3.0.zip",
+      "archive_size": 215695,
+      "archive_hash": "sha256:c569e5acd51bf7b9c6d9664c30811941e709a8194b4d10e6a0ee5299c22037b4"
     },
     {
       "schema_version": "1.0.0",
@@ -160,7 +161,7 @@
       "id": "RealTimeMotionPath",
       "name": "RealTimeMotionPath",
       "tagline": "Display and edit motion paths in real time in the 3D Viewport, with direct handle editing and Graph ...",
-      "version": "1.6.2",
+      "version": "1.6.3",
       "type": "add-on",
       "maintainer": "HAOAH",
       "license": [
@@ -170,9 +171,9 @@
       "tags": [
         "Animation"
       ],
-      "archive_url": "./RealTimeMotionPath-1.6.2.zip",
-      "archive_size": 5404341,
-      "archive_hash": "sha256:709f375db2aeb5593663f5a4092e93d5548bfd623e3217049a42ff0f9233dd88"
+      "archive_url": "./RealTimeMotionPath-1.6.3.zip",
+      "archive_size": 5430815,
+      "archive_hash": "sha256:7b8c04229e2a751c172bb5c0811da002025d2593209c9b004a4a8abb335405c5"
     },
     {
       "schema_version": "1.0.0",
