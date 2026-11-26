@@ -31,7 +31,7 @@ if not exist "%~dp0release.ps1" (
 REM call PowerShell to run release.ps1 (NoPause mode: no internal pause, this bat pauses once)
 echo Running release.ps1 ...
 echo --------------------------------------------
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0release.ps1" -NoPause
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0release.ps1" -NoPause %*
 set "EXIT_CODE=%ERRORLEVEL%"
 echo --------------------------------------------
 

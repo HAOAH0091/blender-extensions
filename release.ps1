@@ -4,13 +4,15 @@
 # 用 -NoPause 可禁止内部所有 "Press Enter" 暂停(供 bat 包装脚本调用, 由 bat 统一 pause)
 
 param(
-    [switch]$NoPause
+    [switch]$NoPause,
+    [string]$Repackage = ""
 )
 
 # 统一暂停出口：NoPause 时跳过内部暂停(bat 会兜底 pause)
 function Wait-Close {
     if (-not $NoPause) {
-        Wait-Close | Out-Null
+        Write-Host ""
+        Read-Host "Press Enter to close" | Out-Null
     }
 }
 
@@ -54,6 +56,22 @@ $blenderExe = "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe
 if ($env:BLENDER_EXT_BLENDER_EXE) { $blenderExe = $env:BLENDER_EXT_BLENDER_EXE }
 $packagesDir = Join-Path $repoRoot "packages"
 $tempRoot = "$env:TEMP\blender-ext-release"
+
+# GitHub rejects any single file above 100 MB, so keep a hard stop well below it.
+# The environment override exists for tests and for non-GitHub mirrors.
+$maxZipMB = 95
+if ($env:BLENDER_EXT_MAX_ZIP_MB) { $maxZipMB = [double]$env:BLENDER_EXT_MAX_ZIP_MB }
+$maxStagedMB = $maxZipMB * 1.6
+
+# Add-ons to rebuild even though the index already lists the same version.
+$repackageIds = @{}
+foreach ($rawId in ($Repackage -split ',')) {
+    $rid = $rawId.Trim()
+    if ($rid) { $repackageIds[$rid] = $true }
+}
+
+# Development material that is never part of a release package.
+$devDirs = @("_dev", ".dev", "_dev_tools", ".docs", "compify-guide")
 
 # ============================ preflight ============================
 $repoFull = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd('\')
@@ -155,7 +173,10 @@ function New-Manifest($id, $info) {
     $tags = Get-Tags $info.category
     $tagsStr = ($tags | ForEach-Object { '"' + $_ + '"' }) -join ", "
 
-    $desc = ConvertTo-TomlString (Safe-Substring $info.description 100)
+    $descText = Safe-Substring $info.description 100
+    # Blender rejects a tagline that ends with punctuation, and truncation appends "...".
+    $descText = $descText -replace '[\p{P}\s]+$', ''
+    $desc = ConvertTo-TomlString $descText
 
     $lines = @()
     $lines += 'schema_version = "1.0.0"'
@@ -189,12 +210,24 @@ function Clear-TempPackage($dir) {
     Get-ChildItem $dir -Recurse -Directory -Filter ".~stale~*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
     # dev directories ---- do not ship to users
-    @("dev_plans", "_plans", "docs", "plans", "notes", ".vscode", ".idea", "__MACOSX") | ForEach-Object {
+    $devDirPatterns = @("dev_plans", "_plans", "docs", "plans", "notes", ".vscode", ".idea", "__MACOSX") + $devDirs
+    $devDirPatterns | ForEach-Object {
         Get-ChildItem $dir -Recurse -Directory -Filter $_ -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
 
+    # VCS metadata belongs to the repository, not to the add-on.
+    Get-ChildItem $dir -Recurse -File -Filter ".gitattributes" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+
     # empty / $null files
     Get-ChildItem $dir -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq '$null' -or $_.Name -eq '' } | Remove-Item -Force -ErrorAction SilentlyContinue
+
+    # prune directories left empty after cleaning (removed dev folders, untracked trees)
+    for ($pass = 0; $pass -lt 6; $pass++) {
+        $empties = @(Get-ChildItem $dir -Recurse -Directory -ErrorAction SilentlyContinue |
+            Where-Object { -not (Get-ChildItem $_.FullName -Force -ErrorAction SilentlyContinue) })
+        if ($empties.Count -eq 0) { break }
+        $empties | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 # ============================ main ============================
@@ -219,6 +252,17 @@ if (-not $addonDirs) {
 
 Write-Host "Found $($addonDirs.Count) addons:" -ForegroundColor Green
 $addonDirs | ForEach-Object { Write-Host "  $($_.Name)" }
+
+if ($repackageIds.Count -gt 0) {
+    $knownIds = @($addonDirs | ForEach-Object { $_.Name -replace '-master$', '' })
+    foreach ($rid in @($repackageIds.Keys)) {
+        if ($knownIds -notcontains $rid) {
+            Write-Host "ERROR: -Repackage '$rid' is not an add-on source directory. Known ids: $($knownIds -join ', ')" -ForegroundColor Red
+            Wait-Close
+            exit 1
+        }
+    }
+}
 
 New-Item -ItemType Directory -Force -Path $packagesDir | Out-Null
 
@@ -250,7 +294,8 @@ foreach ($dir in $addonDirs) {
 
     # check if version changed
     $oldVer = $oldVersions[$id]
-    if ($oldVer -and $oldVer -eq $info.version) {
+    $forceRebuild = $repackageIds.ContainsKey($id)
+    if ($oldVer -and $oldVer -eq $info.version -and -not $forceRebuild) {
         Write-Host "  SKIP $($dir.Name): v$($info.version) unchanged" -ForegroundColor DarkGray
         $skipped += $id
         continue
@@ -260,7 +305,9 @@ foreach ($dir in $addonDirs) {
     Get-ChildItem $packagesDir -Filter "$id-[0-9]*.zip" -ErrorAction SilentlyContinue | Remove-Item -Force
 
     Write-Host ""
-    if ($oldVer) {
+    if ($oldVer -and $forceRebuild -and $oldVer -eq $info.version) {
+        Write-Host "--- $($dir.Name): v$($info.version) (forced rebuild) ---" -ForegroundColor Cyan
+    } elseif ($oldVer) {
         Write-Host "--- $($dir.Name): v$oldVer -> v$($info.version) ---" -ForegroundColor Cyan
     } else {
         Write-Host "--- $($dir.Name): NEW v$($info.version) ---" -ForegroundColor Cyan
@@ -270,7 +317,29 @@ foreach ($dir in $addonDirs) {
     if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
     Copy-Item -Recurse -Path $dir.FullName -Destination $tmp
 
+    # Release artifacts come from committed sources: never ship local scratch files.
+    if (Test-Path (Join-Path $dir.FullName ".git")) {
+        $untracked = @(& git -C $dir.FullName ls-files --others --exclude-standard 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $untracked.Count -gt 0) {
+            foreach ($rel in $untracked) {
+                $target = Join-Path $tmp $rel
+                if (Test-Path -LiteralPath $target) {
+                    Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
+            Write-Host "  removed $($untracked.Count) untracked file(s) from package" -ForegroundColor DarkGray
+        }
+    }
+
     Clear-TempPackage $tmp
+
+    $stagedMB = [math]::Round((Get-ChildItem $tmp -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum / 1MB, 2)
+    if ($stagedMB -gt $maxStagedMB) {
+        Write-Host "ERROR: $($dir.Name) stages $stagedMB MB, which cannot fit in a $maxZipMB MB package." -ForegroundColor Red
+        Write-Host "  Add the development material to the exclusion list; nothing was committed." -ForegroundColor Yellow
+        Wait-Close
+        exit 1
+    }
 
     $manifest = New-Manifest $id $info
     $manifestPath = Join-Path $tmp "blender_manifest.toml"
@@ -290,6 +359,37 @@ foreach ($dir in $addonDirs) {
         Compress-Archive -Path $items.FullName -DestinationPath $zipPath -Force
         $sizeKB = [math]::Round((Get-Item $zipPath).Length / 1KB, 1)
         Write-Host "  -> $zipName (${sizeKB} KB)" -ForegroundColor Green
+
+        $zipMB = (Get-Item $zipPath).Length / 1MB
+        if ($zipMB -gt $maxZipMB) {
+            Write-Host "ERROR: $zipName is $([math]::Round($zipMB, 1)) MB, above the $maxZipMB MB limit." -ForegroundColor Red
+            Write-Host "  Exclude development material or split the package; nothing was committed." -ForegroundColor Yellow
+            Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+            Wait-Close
+            exit 1
+        }
+
+        # Self-check: no development directory may survive into the archive.
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+        try {
+            $zipEntries = @($zip.Entries)
+            $leaked = @($zipEntries | Where-Object {
+                $parts = $_.FullName -split '[\\/]'
+                $parts.Count -gt 1 -and ($devDirs -contains $parts[0])
+            })
+            $unpackedMB = [math]::Round((($zipEntries | Measure-Object Length -Sum).Sum) / 1MB, 2)
+        } finally {
+            $zip.Dispose()
+        }
+        if ($leaked.Count -gt 0) {
+            Write-Host "ERROR: $zipName still contains development files: $($leaked[0].FullName)" -ForegroundColor Red
+            Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+            Wait-Close
+            exit 1
+        }
+        Write-Host "    $($zipEntries.Count) entries, $unpackedMB MB unpacked" -ForegroundColor DarkGray
+
         $packaged += $id
         $packagedInfo[$id] = $info.version
     } finally {
@@ -405,52 +505,59 @@ if ($packaged.Count -gt 0) {
 Write-Host ""
 Write-Host "Pushing to GitHub..." -ForegroundColor Cyan
 Push-Location $repoRoot
+$failure = $null
 try {
-    git add packages/
-    $gitStatus = git status -s
-    if (-not $gitStatus) {
-        Write-Host "  no changes, skip." -ForegroundColor DarkYellow
-        Pop-Location
-        Write-Host ""
-        Write-Host "=== DONE ===" -ForegroundColor Cyan
-        Wait-Close
-        return
+    & git add packages/
+    if ($LASTEXITCODE -ne 0) { throw "git add failed." }
+
+    & git diff --cached --quiet
+    $hasStaged = ($LASTEXITCODE -ne 0)
+
+    if ($hasStaged) {
+        $gName = git config --local user.name
+        $gEmail = git config --local user.email
+        if (-not $gName -or -not $gEmail) {
+            throw "git identity not configured. Run: git config --local user.name / user.email"
+        }
+
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm"
+        $commitMsg = "release: $date - $($packaged -join ', ')"
+        & git commit -m $commitMsg
+        if ($LASTEXITCODE -ne 0) { throw "git commit failed (identity or other issue); nothing was pushed." }
+        Write-Host "  commit created: $(& git rev-parse --short HEAD)" -ForegroundColor Green
+    } else {
+        Write-Host "  no file changes." -ForegroundColor DarkYellow
     }
 
-    # 检查 git 身份：未配置会导致 commit 失败且脚本误显示 pushed
-    $gName = git config --local user.name
-    $gEmail = git config --local user.email
-    if (-not $gName -or -not $gEmail) {
-        Write-Host "ERROR: git identity not configured. Run:" -ForegroundColor Red
-        Write-Host "  git config --local user.name \"Your Name\"" -ForegroundColor Yellow
-        Write-Host "  git config --local user.email \"you@example.com\"" -ForegroundColor Yellow
-        Pop-Location
-        Wait-Close
-        exit 1
-    }
+    $ahead = [int](& git rev-list --count origin/main..HEAD)
+    if ($LASTEXITCODE -ne 0) { throw "cannot compare with origin/main - is the remote configured?" }
 
-    $date = Get-Date -Format "yyyy-MM-dd HH:mm"
-    $commitMsg = "release: $date - $($packaged -join ', ')"
-    git commit -m $commitMsg
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: git commit failed (identity or other issue), NOT pushed." -ForegroundColor Red
-        Pop-Location
-        Wait-Close
-        exit 1
-    }
-
-    try {
-        git push
+    if ($ahead -eq 0) {
+        Write-Host "  already up to date, nothing to push." -ForegroundColor DarkYellow
+    } else {
+        Write-Host "  $ahead commit(s) to push..." -ForegroundColor Cyan
+        & git push
+        if ($LASTEXITCODE -ne 0) {
+            throw "git push failed. The local commit is kept; fix the cause and rerun this script to push it."
+        }
+        $aheadAfter = [int](& git rev-list --count origin/main..HEAD)
+        if ($LASTEXITCODE -ne 0 -or $aheadAfter -ne 0) {
+            throw "push claimed success but origin/main is still behind HEAD."
+        }
         Write-Host "  pushed." -ForegroundColor Green
-    } catch {
-        Write-Host "ERROR: git push failed. Rolling back commit..." -ForegroundColor Red
-        git reset --soft HEAD~1
-        Write-Host "  commit rolled back. Fix the issue and try again."
-        Wait-Close
-        exit 1
     }
+
+    Write-Host "  local $(& git rev-parse --short HEAD) | remote $(& git rev-parse --short origin/main)" -ForegroundColor Green
+} catch {
+    $failure = $_.Exception.Message
 } finally {
     Pop-Location
+}
+
+if ($failure) {
+    Write-Host "ERROR: $failure" -ForegroundColor Red
+    Wait-Close
+    exit 1
 }
 
 Write-Host ""
