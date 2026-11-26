@@ -45,11 +45,47 @@ function Safe-Substring($s, $maxLen) {
 }
 
 # ============================ config ============================
-$blenderExe = "G:\steam\steamapps\common\Blender\blender.exe"
-$addonsSource = "F:\desktop\BaiduSyncdisk\addons"
-$repoRoot = "F:\desktop\BaiduSyncdisk\blender-extensions-repo"
+# Resolve paths from the script location so the entry keeps working after a machine move.
+# The add-on source and the Blender executable can be overridden for non-default layouts.
+$repoRoot = $PSScriptRoot
+$addonsSource = Join-Path (Split-Path -Parent $repoRoot) "addons"
+if ($env:BLENDER_EXT_ADDONS_SOURCE) { $addonsSource = $env:BLENDER_EXT_ADDONS_SOURCE }
+$blenderExe = "C:\Program Files (x86)\Steam\steamapps\common\Blender\blender.exe"
+if ($env:BLENDER_EXT_BLENDER_EXE) { $blenderExe = $env:BLENDER_EXT_BLENDER_EXE }
 $packagesDir = Join-Path $repoRoot "packages"
 $tempRoot = "$env:TEMP\blender-ext-release"
+
+# ============================ preflight ============================
+$repoFull = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd('\')
+$gitRoot = & git -C $repoRoot rev-parse --show-toplevel 2>$null
+$gitExit = $LASTEXITCODE
+$gitRoot = @($gitRoot)[0]
+if ($gitExit -ne 0 -or -not $gitRoot) {
+    Write-Host "ERROR: not a Git repository: $repoRoot" -ForegroundColor Red
+    Write-Host "Keep release.bat and release.ps1 at the repository root." -ForegroundColor Yellow
+    Wait-Close
+    exit 1
+}
+$gitFull = [System.IO.Path]::GetFullPath($gitRoot.Trim()).TrimEnd('\')
+if (-not [string]::Equals($repoFull, $gitFull, [System.StringComparison]::OrdinalIgnoreCase)) {
+    Write-Host "ERROR: release scripts must sit at the Git repository root." -ForegroundColor Red
+    Write-Host "  script dir: $repoFull" -ForegroundColor Yellow
+    Write-Host "  git root:   $gitFull" -ForegroundColor Yellow
+    Wait-Close
+    exit 1
+}
+if (-not (Test-Path -LiteralPath $addonsSource -PathType Container)) {
+    Write-Host "ERROR: add-on source directory not found: $addonsSource" -ForegroundColor Red
+    Write-Host "Set BLENDER_EXT_ADDONS_SOURCE or place the addons folder next to the repository." -ForegroundColor Yellow
+    Wait-Close
+    exit 1
+}
+if (-not (Test-Path -LiteralPath $blenderExe -PathType Leaf)) {
+    Write-Host "ERROR: Blender not found at: $blenderExe" -ForegroundColor Red
+    Write-Host "Set BLENDER_EXT_BLENDER_EXE to the installed blender.exe." -ForegroundColor Yellow
+    Wait-Close
+    exit 1
+}
 
 # ============================ parse bl_info ============================
 function Get-BlInfo($addonDir) {
@@ -201,6 +237,7 @@ if (Test-Path $indexPath) {
 
 # ---- packaging: skip unchanged ----
 $packaged = @()
+$packagedInfo = @{}
 $skipped = @()
 foreach ($dir in $addonDirs) {
     $id = $dir.Name -replace '-master$', ''
@@ -254,6 +291,7 @@ foreach ($dir in $addonDirs) {
         $sizeKB = [math]::Round((Get-Item $zipPath).Length / 1KB, 1)
         Write-Host "  -> $zipName (${sizeKB} KB)" -ForegroundColor Green
         $packaged += $id
+        $packagedInfo[$id] = $info.version
     } finally {
         Pop-Location
     }
@@ -303,17 +341,18 @@ Write-Host "  removed $removed stale zip(s), now $keptCount newest zip(s)." -For
 Write-Host ""
 Write-Host "Generating index.json..." -ForegroundColor Cyan
 
-if (-not (Test-Path $blenderExe)) {
-    Write-Host "ERROR: Blender not found at: $blenderExe" -ForegroundColor Red
-    Write-Host "Update `$blenderExe in release.ps1 if Blender was moved."
-    Wait-Close
-    exit 1
-}
-
 $prevErrorAction = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 $result = & $blenderExe --command extension server-generate --repo-dir=$packagesDir 2>&1
+$blenderExit = $LASTEXITCODE
 $ErrorActionPreference = $prevErrorAction
+if ($blenderExit -ne 0) {
+    Write-Host "ERROR: Blender server-generate failed (exit code $blenderExit)." -ForegroundColor Red
+    $result | Select-Object -Last 20 | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+    Write-Host "Nothing was committed or pushed." -ForegroundColor Yellow
+    Wait-Close
+    exit 1
+}
 $foundMatch = $result | Select-String "found (\d+) packages"
 if ($foundMatch) {
     $count = $foundMatch.Matches.Groups[1].Value
@@ -326,6 +365,40 @@ if (-not (Test-Path $indexPath)) {
     Write-Host "ERROR: index.json was not generated. Check Blender output above." -ForegroundColor Red
     Wait-Close
     exit 1
+}
+
+if ($packaged.Count -gt 0) {
+    try {
+        $newIndex = Get-Content $indexPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    } catch {
+        Write-Host "ERROR: index.json is not valid JSON: $($_.Exception.Message)" -ForegroundColor Red
+        Wait-Close
+        exit 1
+    }
+    $indexById = @{}
+    foreach ($entry in $newIndex.data) { $indexById[$entry.id] = $entry }
+    foreach ($id in $packaged) {
+        $expectedVer = $packagedInfo[$id]
+        $entry = $indexById[$id]
+        if (-not $entry) {
+            Write-Host "ERROR: package '$id' is missing from index.json." -ForegroundColor Red
+            Wait-Close
+            exit 1
+        }
+        if ($entry.version -ne $expectedVer) {
+            Write-Host "ERROR: index.json has $id v$($entry.version), expected v$expectedVer." -ForegroundColor Red
+            Wait-Close
+            exit 1
+        }
+        $zipPath = Join-Path $packagesDir "$id-$expectedVer.zip"
+        $actualHash = "sha256:" + (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLower()
+        if ($entry.archive_hash -ne $actualHash) {
+            Write-Host "ERROR: index.json hash for $id does not match $zipPath." -ForegroundColor Red
+            Wait-Close
+            exit 1
+        }
+    }
+    Write-Host "  index verified for $($packaged.Count) package(s)." -ForegroundColor Green
 }
 
 # ============================ git push ============================
