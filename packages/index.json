@@ -8,7 +8,7 @@
       "id": "aov_plus",
       "name": "AOV+",
       "tagline": "AOV\u8282\u70b9\u7ba1\u7406\u3001\u8f93\u51fa\u6587\u4ef6\u540d\u6279\u5904\u7406\u4e0e\u9009\u62e9\u6027\u6e32\u67d3\u5de5\u5177",
-      "version": "2.4.3",
+      "version": "2.4.5",
       "type": "add-on",
       "maintainer": "HAOAH",
       "license": [
@@ -18,9 +18,9 @@
       "tags": [
         "Render"
       ],
-      "archive_url": "./aov_plus-2.4.3.zip",
-      "archive_size": 53969,
-      "archive_hash": "sha256:1ce07ea42eee042150ce3f6b60a2f576b4d683738df1dead552c578ef3887401"
+      "archive_url": "./aov_plus-2.4.5.zip",
+      "archive_size": 52424,
+      "archive_hash": "sha256:736654749552943fef3b4d23c847aaf2c1823208e20bfab2eb1dd99d032800ca"
     },
     {
       "schema_version": "1.0.0",
@@ -65,8 +65,8 @@
       "schema_version": "1.0.0",
       "id": "compify",
       "name": "Compify",
-      "tagline": "Camera projection UV adjustment for 3D compositing.",
-      "version": "3.0.8",
+      "tagline": "Camera projection UV adjustment for 3D compositing",
+      "version": "3.3.1",
       "type": "add-on",
       "maintainer": "Nathan Vegdahl, Ian Hubert",
       "license": [
@@ -76,16 +76,16 @@
       "tags": [
         "Compositing"
       ],
-      "archive_url": "./compify-3.0.8.zip",
-      "archive_size": 1486907,
-      "archive_hash": "sha256:be00140fab8c7485151235572462a4e0c5bc0600c8afb9eea6051a9b7d0a774b"
+      "archive_url": "./compify-3.3.1.zip",
+      "archive_size": 318862,
+      "archive_hash": "sha256:6fa72a7025f60d71324bb61da983a3711321b5bf3a73d46695d73d25144842c4"
     },
     {
       "schema_version": "1.0.0",
       "id": "image_cutter",
       "name": "Image Cutter\uff08\u8d34\u56fe\u62a0\u7f51\u683c\uff09",
       "tagline": "\u6309\u8d34\u56fe\u7684\u900f\u660e\u533a\u62a0\u51fa\u5f62\u72b6\uff0c\u94fa\u6210\u5e26\u8d34\u56fe\u4e0e UV \u7684\u4e09\u89d2\u7f51\u683c\uff1b\u53c2\u6570\u5b9e\u65f6\u53ef\u8c03\uff0c\u652f\u6301\u94a2\u7b14\u753b\u8def\u5f84\u5f15\u5bfc",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "type": "add-on",
       "maintainer": "\u6d69 & \u5c0f\u6f88",
       "license": [
@@ -95,9 +95,9 @@
       "tags": [
         "Pipeline"
       ],
-      "archive_url": "./image_cutter-0.3.0.zip",
-      "archive_size": 215695,
-      "archive_hash": "sha256:c569e5acd51bf7b9c6d9664c30811941e709a8194b4d10e6a0ee5299c22037b4"
+      "archive_url": "./image_cutter-0.4.0.zip",
+      "archive_size": 225508,
+      "archive_hash": "sha256:f525b0019d36f632ab44c169bfc7eea58f652e9ebf5a3ca9a45104e513cd0b3e"
     },
     {
       "schema_version": "1.0.0",
