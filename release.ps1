@@ -27,25 +27,6 @@ function ConvertTo-TomlString($s) {
     return $s.Replace('\', '\\').Replace('"', '\"')
 }
 
-function Safe-Substring($s, $maxLen) {
-    # Truncate by character count, avoiding surrogate-pair split.
-    if ($s.Length -le $maxLen) { return $s }
-    $result = ""
-    $i = 0
-    $count = 0
-    while ($i -lt $s.Length -and $count -lt $maxLen) {
-        if ([char]::IsHighSurrogate($s[$i]) -and ($i + 1) -lt $s.Length -and [char]::IsLowSurrogate($s[$i + 1])) {
-            $result += $s.Substring($i, 2)
-            $i += 2
-        } else {
-            $result += $s[$i]
-            $i++
-        }
-        $count++
-    }
-    return $result + "..."
-}
-
 # ============================ config ============================
 # Resolve paths from the script location so the entry keeps working after a machine move.
 # The add-on source and the Blender executable can be overridden for non-default layouts.
@@ -71,7 +52,10 @@ foreach ($rawId in ($Repackage -split ',')) {
 }
 
 # Development material that is never part of a release package.
-$devDirs = @("_dev", ".dev", "_dev_tools", ".docs", "compify-guide")
+$devDirs = @("_dev", ".dev", "_dev_tools", ".docs", "tests", "compify-guide")
+
+# Directory names skipped while copying the add-on (and again after the copy, as a safety net).
+$devSkipNames = @(".git", "__pycache__", "__MACOSX", "dev_plans", "_plans", "docs", "plans", "notes", ".vscode", ".idea") + $devDirs
 
 # ============================ preflight ============================
 $repoFull = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd('\')
@@ -173,8 +157,15 @@ function New-Manifest($id, $info) {
     $tags = Get-Tags $info.category
     $tagsStr = ($tags | ForEach-Object { '"' + $_ + '"' }) -join ", "
 
-    $descText = Safe-Substring $info.description 100
-    # Blender rejects a tagline that ends with punctuation, and truncation appends "...".
+    # Blender requires: tagline <= 64 characters and no trailing punctuation.
+    $descText = [string]$info.description
+    if ($descText.Length -gt 64) {
+        $cut = $descText.Substring(0, 64)
+        if ([char]::IsHighSurrogate($cut[$cut.Length - 1])) { $cut = $cut.Substring(0, $cut.Length - 1) }
+        $lastSpace = $cut.LastIndexOf(' ')
+        if ($lastSpace -ge 40) { $cut = $cut.Substring(0, $lastSpace) }
+        $descText = $cut
+    }
     $descText = $descText -replace '[\p{P}\s]+$', ''
     $desc = ConvertTo-TomlString $descText
 
@@ -200,6 +191,21 @@ function New-Manifest($id, $info) {
     return ($lines -join [Environment]::NewLine)
 }
 
+# ============================ copy add-on ============================
+function Copy-AddonTree {
+    param([string]$Source, [string]$Destination, [string[]]$SkipNames)
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    foreach ($item in Get-ChildItem -LiteralPath $Source -Force) {
+        if ($SkipNames -contains $item.Name) { continue }
+        $target = Join-Path $Destination $item.Name
+        if ($item.PSIsContainer) {
+            Copy-AddonTree -Source $item.FullName -Destination $target -SkipNames $SkipNames
+        } else {
+            Copy-Item -LiteralPath $item.FullName -Destination $target -Force
+        }
+    }
+}
+
 # ============================ clean temp ============================
 function Clear-TempPackage($dir) {
     # __pycache__ / .git / .gitignore / .~stale~
@@ -210,8 +216,7 @@ function Clear-TempPackage($dir) {
     Get-ChildItem $dir -Recurse -Directory -Filter ".~stale~*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
     # dev directories ---- do not ship to users
-    $devDirPatterns = @("dev_plans", "_plans", "docs", "plans", "notes", ".vscode", ".idea", "__MACOSX") + $devDirs
-    $devDirPatterns | ForEach-Object {
+    $devSkipNames | ForEach-Object {
         Get-ChildItem $dir -Recurse -Directory -Filter $_ -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
 
@@ -315,7 +320,7 @@ foreach ($dir in $addonDirs) {
 
     $tmp = Join-Path $tempRoot $id
     if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
-    Copy-Item -Recurse -Path $dir.FullName -Destination $tmp
+    Copy-AddonTree -Source $dir.FullName -Destination $tmp -SkipNames $devSkipNames
 
     # Release artifacts come from committed sources: never ship local scratch files.
     if (Test-Path (Join-Path $dir.FullName ".git")) {
